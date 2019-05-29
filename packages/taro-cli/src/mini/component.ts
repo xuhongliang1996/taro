@@ -65,6 +65,7 @@ export function isFileToBeTaroComponent (
     sourcePath: sourcePath,
     isTyped: REG_TYPESCRIPT.test(sourcePath),
     adapter: buildAdapter,
+    isNormal: true,
     env: constantsReplaceList,
     jsxAttributeNameReplace
   })
@@ -183,7 +184,7 @@ export async function buildSingleComponent (
     setHasBeenBuiltComponents(component)
   }
   try {
-    const isTaroComponentRes = isFileToBeTaroComponent(componentContent, component, outputComponentJSPath)
+    const isTaroComponentRes = isFileToBeTaroComponent(componentContent, component)
     const componentExportsMap = getComponentExportsMap()
     if (!isTaroComponentRes.isTaroComponent) {
       const transformResult = isTaroComponentRes.transformResult
