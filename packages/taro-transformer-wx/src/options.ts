@@ -12,7 +12,7 @@ export interface Options {
   // sourceDir?: string,
   code: string,
   isTyped: boolean,
-  // isNormal?: boolean,
+  isNormal?: boolean,
   env?: Object,
   adapter?: Adapters,
   jsxAttributeNameReplace?: Object,

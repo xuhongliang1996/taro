@@ -37,7 +37,7 @@ import {
   GEN_LOOP_COMPID
 } from './constant'
 import { Adapters, setAdapter, Adapter } from './adapter'
-import { Options, setTransformOptions, buildBabelTransformOptions, setIsNormal, isNormal } from './options'
+import { Options, setTransformOptions, buildBabelTransformOptions } from './options'
 import { get as safeGet, cloneDeep } from 'lodash'
 import { isTestEnv } from './env'
 
@@ -239,22 +239,22 @@ export default function transform (options: TransformOptions): TransformResult {
   // 原因大概是 babylon.parse 没有生成 File 实例导致 scope 和 path 原型上都没有 `file`
   // 将来升级到 babel@7 可以直接用 parse 而不是 transform
   const ast = parse(code, buildBabelTransformOptions()).ast as t.File
-  traverse(ast, {
-    JSXElement (p) {
-      setIsNormal(false)
-      p.stop()
-    },
-    ImportDeclaration (path) {
-      const { source, specifiers } = path.node
-      if (source.value === TARO_PACKAGE_NAME) {
-        if (specifiers.some(s => s.local.name === 'Component')) {
-          setIsNormal(false)
-          path.stop()
-        }
-      }
-    }
-  })
-  if (isNormal) {
+  // traverse(ast, {
+  //   JSXElement (p) {
+  //     setIsNormal(false)
+  //     p.stop()
+  //   },
+  //   ImportDeclaration (path) {
+  //     const { source, specifiers } = path.node
+  //     if (source.value === TARO_PACKAGE_NAME) {
+  //       if (specifiers.some(s => s.local.name === 'Component')) {
+  //         setIsNormal(false)
+  //         path.stop()
+  //       }
+  //     }
+  //   }
+  // })
+  if (options.isNormal) {
     if (options.isTyped) {
       const mainClassNode = ast.program.body.find(v => {
         return t.isClassDeclaration(v)
