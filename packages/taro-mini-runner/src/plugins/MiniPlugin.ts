@@ -1,3 +1,4 @@
+
 import * as path from 'path'
 import * as fs from 'fs-extra'
 
@@ -6,7 +7,6 @@ import * as webpack from 'webpack'
 import * as SingleEntryPlugin from 'webpack/lib/SingleEntryPlugin'
 import * as FunctionModulePlugin from 'webpack/lib/FunctionModulePlugin'
 import * as NodeSourcePlugin from 'webpack/lib/node/NodeSourcePlugin'
-import * as JsonpTemplatePlugin from 'webpack/lib/JsonpTemplatePlugin'
 import * as LoaderTargetPlugin from 'webpack/lib/LoaderTargetPlugin'
 import * as VirtualModulePlugin from 'virtual-module-webpack-plugin'
 import { defaults } from 'lodash'
@@ -16,6 +16,8 @@ import { Config as IConfig } from '@tarojs/taro'
 
 import { REG_TYPESCRIPT, BUILD_TYPES, PARSE_AST_TYPE } from '../utils/constants'
 import { traverseObjectNode, resolveScriptPath } from '../utils'
+
+import TaroTemplatePlugin from './TaroTemplatePlugin'
 
 interface IMiniPluginOptions {
   appEntry?: string,
@@ -39,16 +41,14 @@ const taroFileTypeMap: ITaroFileInfo = {}
 
 export const createTarget = function createTarget(name) {
 	const target = compiler => {
-		const { options } = compiler
-		compiler.apply(
-			new JsonpTemplatePlugin(options.output),
-			new FunctionModulePlugin(options.output),
-			new NodeSourcePlugin(options.node),
-			new LoaderTargetPlugin('web')
-		)
+    const { options } = compiler
+    new TaroTemplatePlugin().apply(compiler)
+    new FunctionModulePlugin(options.output).apply(compiler)
+    new NodeSourcePlugin(options.node).apply(compiler)
+    new LoaderTargetPlugin('web').apply(compiler)
 	}
 
-	const creater = new Function(
+ 	const creater = new Function(
 		`var t = arguments[0]; return function ${name}(c) { return t(c); }`
 	);
 	return creater(target)
@@ -75,7 +75,7 @@ export default class MiniPlugin {
       commonLibName: 'lib.js'
     })
 
-    this.pages = new Set()
+     this.pages = new Set()
     this.components = new Set()
   }
 
@@ -96,7 +96,7 @@ export default class MiniPlugin {
 			})
     )
 
-    compiler.hooks.emit.tapAsync(
+     compiler.hooks.emit.tapAsync(
       PLUGIN_NAME,
       this.tryAsync(async compilation => {
         await this.generateMiniFiles(compilation)
@@ -178,7 +178,7 @@ export default class MiniPlugin {
       }
     })
 
-    return {
+     return {
       configObj
     }
   }
