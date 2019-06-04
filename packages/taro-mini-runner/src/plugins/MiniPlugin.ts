@@ -18,13 +18,15 @@ import { REG_TYPESCRIPT, BUILD_TYPES, PARSE_AST_TYPE } from '../utils/constants'
 import { traverseObjectNode, resolveScriptPath } from '../utils'
 
 import TaroTemplatePlugin from './TaroTemplatePlugin'
+import TaroLoadChunksPlugin from './TaroLoadChunksPlugin'
 
 interface IMiniPluginOptions {
   appEntry?: string,
-  buildAdapter: BUILD_TYPES
+  buildAdapter: BUILD_TYPES,
+  commonChunks?: string[]
 }
 
-interface ITaroFileInfo {
+export interface ITaroFileInfo {
   [key: string]: {
     type: PARSE_AST_TYPE,
     config: IConfig,
@@ -40,7 +42,7 @@ const PLUGIN_NAME = 'MiniPlugin'
 const taroFileTypeMap: ITaroFileInfo = {}
 
 export const createTarget = function createTarget(name) {
-	const target = compiler => {
+	const target = (compiler: webpack.compiler.Compiler) => {
     const { options } = compiler
     new TaroTemplatePlugin().apply(compiler)
     new FunctionModulePlugin(options.output).apply(compiler)
@@ -72,7 +74,7 @@ export default class MiniPlugin {
   constructor (options = {}) {
     this.options = defaults(options || {}, {
       buildAdapter: BUILD_TYPES.WEAPP,
-      commonLibName: 'lib.js'
+      commonChunks: ['runtime', 'vendors']
     })
 
      this.pages = new Set()
@@ -102,6 +104,11 @@ export default class MiniPlugin {
         await this.generateMiniFiles(compilation)
       })
     )
+
+    new TaroLoadChunksPlugin({
+      commonChunks: this.options.commonChunks,
+      taroFileTypeMap
+    }).apply(compiler)
   }
 
   getAppEntry (compiler) {

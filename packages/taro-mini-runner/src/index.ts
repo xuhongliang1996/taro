@@ -31,11 +31,7 @@ export default function build (config: IBuildConfig) {
         chunks: 'all',
         maxInitialRequests: Infinity,
         minSize: 0,
-        cacheGroups: {
-          vendor: {
-            name: 'vendors'
-          }
-        }
+        name: 'vendors'
       }
     },
     module: {
